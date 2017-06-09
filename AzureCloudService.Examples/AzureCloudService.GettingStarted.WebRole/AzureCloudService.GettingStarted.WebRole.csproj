@@ -117,6 +117,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\LogsController.v1.cs">
+      <DependentUpon>LogsController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\LogsController.v2.cs">
+      <DependentUpon>LogsController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\DefaultController.v2.cs">
+      <DependentUpon>DefaultController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\DefaultController.cs" />
+    <Compile Include="Controllers\DefaultController.v1.cs">
+      <DependentUpon>DefaultController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\LogsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -134,8 +148,13 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Controllers\" />
     <Folder Include="Models\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AzureCloudService.Models\AzureCloudService.Utils.csproj">
+      <Project>{a2000cfb-3a8c-43ae-a99f-33236f54f9f5}</Project>
+      <Name>AzureCloudService.Utils</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

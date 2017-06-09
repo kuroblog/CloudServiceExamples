@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.GettingSt
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6045F0D6-C92D-4201-BADF-60BEA41B8CDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.Utils", "AzureCloudService.Models\AzureCloudService.Utils.csproj", "{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{4BFAFC22-11EC-4F0A-BF2F-51B51B53DB61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BFAFC22-11EC-4F0A-BF2F-51B51B53DB61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BFAFC22-11EC-4F0A-BF2F-51B51B53DB61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
