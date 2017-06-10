@@ -21,6 +21,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6045F0D6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.Utils", "AzureCloudService.Models\AzureCloudService.Utils.csproj", "{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CastleWindsor", "CastleWindsor", "{6ACFD894-5EFA-447A-A7EC-BAF98AA1A101}"
+EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "AzureCloudService.CastleWindsor", "AzureCloudService.CastleWindsor\AzureCloudService.CastleWindsor.ccproj", "{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.CastleWindsor.WebRole", "AzureCloudService.CastleWindsor.WebRole\AzureCloudService.CastleWindsor.WebRole.csproj", "{E60A20AF-8626-4E59-AFED-54671CC3317C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.CastleWindsor.WorkerRole", "AzureCloudService.CastleWindsor.WorkerRole\AzureCloudService.CastleWindsor.WorkerRole.csproj", "{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +63,18 @@ Global
 		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2000CFB-3A8C-43AE-A99F-33236F54F9F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E60A20AF-8626-4E59-AFED-54671CC3317C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E60A20AF-8626-4E59-AFED-54671CC3317C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E60A20AF-8626-4E59-AFED-54671CC3317C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E60A20AF-8626-4E59-AFED-54671CC3317C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,5 +86,8 @@ Global
 		{CE0F4C49-3AD6-4E71-99D4-9CB978B80044} = {5B6788EA-5D80-4C15-8025-4D5879864545}
 		{4BFAFC22-11EC-4F0A-BF2F-51B51B53DB61} = {6045F0D6-C92D-4201-BADF-60BEA41B8CDB}
 		{6045F0D6-C92D-4201-BADF-60BEA41B8CDB} = {5B6788EA-5D80-4C15-8025-4D5879864545}
+		{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383} = {6ACFD894-5EFA-447A-A7EC-BAF98AA1A101}
+		{E60A20AF-8626-4E59-AFED-54671CC3317C} = {6ACFD894-5EFA-447A-A7EC-BAF98AA1A101}
+		{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3} = {6ACFD894-5EFA-447A-A7EC-BAF98AA1A101}
 	EndGlobalSection
 EndGlobal
