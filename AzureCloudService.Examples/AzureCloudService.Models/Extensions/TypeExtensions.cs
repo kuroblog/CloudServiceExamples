@@ -4,10 +4,12 @@ namespace AzureCloudService.Utils.Extensions
     using Infrastructures;
     using Models;
     using Newtonsoft.Json;
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
 
     public static class TypeExtensions
     {
@@ -52,6 +54,27 @@ namespace AzureCloudService.Utils.Extensions
         public static void OutputToDebug<TDto>(this TDto dto) where TDto : IBaseModel, new()
         {
             Debug.WriteLine(dto.ToJsonString());
+        }
+
+        public static TResult Execute<TWorker, TArg, TResult>(this TWorker worker, Func<TArg, TResult> func, TArg arg) where TWorker : IOrderWorker, new()
+        {
+            try
+            {
+                Debug.WriteLine($"{DateTime.UtcNow}: {nameof(TWorker)} {nameof(func)} begin...");
+                Thread.Sleep(100);
+
+                var result = func.Invoke(arg);
+
+                Debug.WriteLine($"{DateTime.UtcNow}: {nameof(TWorker)} {nameof(func)} end.");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"{DateTime.UtcNow}: {nameof(TWorker)} {nameof(func)} error:{Environment.NewLine}{ex}");
+
+                return default(TResult);
+            }
         }
     }
 }

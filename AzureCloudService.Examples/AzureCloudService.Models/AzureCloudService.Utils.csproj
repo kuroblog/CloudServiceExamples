@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DTOs\LogDto.cs" />
+    <Compile Include="DTOs\OrderDto.cs" />
+    <Compile Include="Infrastructures\Orders.cs" />
+    <Compile Include="Types\OrderTypes.cs" />
     <Compile Include="Extensions\DtoExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Infrastructures\IBaseModel.cs" />
@@ -56,6 +59,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,17 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.WindowsAzure;
-using Microsoft.WindowsAzure.Diagnostics;
-using Microsoft.WindowsAzure.ServiceRuntime;
-using Microsoft.WindowsAzure.Storage;
 
 namespace AzureCloudService.CastleWindsor.WorkerRole
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Net;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Microsoft.WindowsAzure;
+    using Microsoft.WindowsAzure.Diagnostics;
+    using Microsoft.WindowsAzure.ServiceRuntime;
+    using Microsoft.WindowsAzure.Storage;
+    using Castle.Windsor;
+    using Castle.Windsor.Installer;
+    using Utils.Infrastructures;
+    using Castle.MicroKernel.Registration;
+    using Utils.Types;
+    using Utils.DTOs;
+    using Utils.Extensions;
+
     public class WorkerRole : RoleEntryPoint
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -43,6 +51,8 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
 
             Trace.TraceInformation("AzureCloudService.CastleWindsor.WorkerRole has been started");
 
+            bootstarp.InstallComponents();
+
             return result;
         }
 
@@ -64,8 +74,121 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
             while (!cancellationToken.IsCancellationRequested)
             {
                 Trace.TraceInformation("Working");
+
+                var order = new OrderDto
+                {
+                    Content = "test",
+                    SubOrders = new SubOrderDto[] {
+                        new SubOrderDto { Type = OrderTypes.Pickup },
+                        new SubOrderDto { Type = OrderTypes.Deliver },
+                        new SubOrderDto { Type = OrderTypes.Violation },
+                        new SubOrderDto { Type = OrderTypes.Unknow }
+                    }
+                };
+
+                order.SubOrders.ToList().ForEach(p =>
+                {
+                    var hasComponent = bootstarp.Container.Kernel.HasComponent(nameof(p.Type));
+                    if (hasComponent)
+                    {
+                        var worker = bootstarp.Container.Resolve<IOrderWorker>(nameof(p.Type));
+                        if (worker != null)
+                        {
+                            worker.CreateOrder(p);
+                        }
+                    }
+                });
+
                 await Task.Delay(1000);
             }
+        }
+
+        private readonly Bootstarp bootstarp = new Bootstarp();
+    }
+
+    public class Bootstarp
+    {
+        public WindsorContainer Container { get; } = new WindsorContainer();
+
+        public Bootstarp()
+        {
+            Container.Install(FromAssembly.This());
+        }
+
+        public void InstallComponents()
+        {
+            Container.Register(Component.For<IOrderWorker>().ImplementedBy<PickupOrderWorker>().LifestylePerThread().Named($"{nameof(OrderTypes.Pickup)}"));
+            Container.Register(Component.For<IOrderWorker>().ImplementedBy<DeliverOrderWorker>().LifestylePerThread().Named($"{nameof(OrderTypes.Deliver)}"));
+            Container.Register(Component.For<IOrderWorker>().ImplementedBy<ViolationOrderWorker>().LifestylePerThread().Named($"{nameof(OrderTypes.Violation)}"));
+        }
+    }
+
+    public class PickupOrderWorker : IOrderWorker
+    {
+        public bool SplitOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(SplitOrder, subOrder);
+        }
+
+        public bool CreateOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(CreateOrder, subOrder);
+        }
+
+        public bool UpdateOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(UpdateOrder, subOrder);
+        }
+
+        public bool CancelOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(CancelOrder, subOrder);
+        }
+    }
+
+    public class DeliverOrderWorker : IOrderWorker
+    {
+        public bool SplitOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(SplitOrder, subOrder);
+        }
+
+        public bool CreateOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(CreateOrder, subOrder);
+        }
+
+        public bool UpdateOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(UpdateOrder, subOrder);
+        }
+
+        public bool CancelOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(CancelOrder, subOrder);
+        }
+    }
+
+    public class ViolationOrderWorker : IOrderWorker
+    {
+        public bool SplitOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(SplitOrder, subOrder);
+        }
+
+        public bool CreateOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(CreateOrder, subOrder);
+        }
+
+        public bool UpdateOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(UpdateOrder, subOrder);
+        }
+
+        public bool CancelOrder(SubOrderDto subOrder)
+        {
+            return this.Execute(CancelOrder, subOrder);
         }
     }
 }
