@@ -19,6 +19,11 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
     using Utils.Types;
     using Utils.DTOs;
     using Utils.Extensions;
+    using Utils;
+    using Newtonsoft.Json;
+    using Microsoft.ServiceBus;
+    using Utils.Models;
+    using Microsoft.WindowsAzure.Storage.Table;
 
     public class WorkerRole : RoleEntryPoint
     {
@@ -53,6 +58,8 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
 
             bootstarp.InstallComponents();
 
+            AzureComponentInitialize();
+
             return result;
         }
 
@@ -75,27 +82,33 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
             {
                 Trace.TraceInformation("Working");
 
-                var order = new OrderDto
+                Parallel.Invoke(async () =>
                 {
-                    Content = "test",
-                    SubOrders = new SubOrderDto[] {
-                        new SubOrderDto { Type = OrderTypes.Pickup },
-                        new SubOrderDto { Type = OrderTypes.Deliver },
-                        new SubOrderDto { Type = OrderTypes.Violation },
-                        new SubOrderDto { Type = OrderTypes.Unknow }
-                    }
-                };
-
-                order.SubOrders.ToList().ForEach(p =>
-                {
-                    var hasComponent = bootstarp.Container.Kernel.HasComponent(nameof(p.Type));
-                    if (hasComponent)
+                    while (true)
                     {
-                        var worker = bootstarp.Container.Resolve<IOrderWorker>(nameof(p.Type));
-                        if (worker != null)
+                        var order = await ReceiveMessageFromQueue(queueName);
+                        if (order != null)
                         {
-                            worker.CreateOrder(p);
+                            var hasComponent = bootstarp.Container.Kernel.HasComponent(typeof(IOrderCommonWorker));
+                            if (hasComponent)
+                            {
+                                var worker = bootstarp.Container.Resolve<IOrderCommonWorker>();
+                                worker.SplitOrder(order);
+                            }
+
+                            order.SubOrders.ToList().ForEach(p =>
+                            {
+                                var typeName = p.Type.ToString();
+                                hasComponent = bootstarp.Container.Kernel.HasComponent(typeName);
+                                if (hasComponent)
+                                {
+                                    var worker = bootstarp.Container.Resolve<IOrderWorker>(typeName);
+                                    worker.CreateOrder(p);
+                                }
+                            });
                         }
+
+                        await Task.Delay(100);
                     }
                 });
 
@@ -104,6 +117,72 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
         }
 
         private readonly Bootstarp bootstarp = new Bootstarp();
+
+        private string serviceBusConnectionString = string.Empty;
+        private string queueName = string.Empty;
+
+        private string storageConnectionString = string.Empty;
+        //private string storageAccount = string.Empty;
+        private string storageLogsTableName = string.Empty;
+
+        private NamespaceManager namespaceManager = null;
+        private CloudStorageAccount cloudStorageAccount = null;
+
+        private CloudTable logTable = null;
+
+        public void AzureComponentInitialize()
+        {
+#if DEBUG
+            serviceBusConnectionString = @"Endpoint=sb://sb-test.servicebus.chinacloudapi.cn/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=MPY8Stj6vlIg2oSvN6VaAFy0Y25egKNg/s1qFQLjOXM=";
+            queueName = "castle_windsor_test";
+
+            storageConnectionString = @"DefaultEndpointsProtocol=https;AccountName=satest1;AccountKey=msu5juE/elGuN5CzMyduVw+3Rl6CqSQT8bZIfTy1Af2FNhU1JJwdaANsOicmeEbDf0eR3+d0l1S3nSoyCDH5MQ==;EndpointSuffix=core.chinacloudapi.cn";
+            //storageAccount = "satest1";
+            storageLogsTableName = "logs";
+#else
+            serviceBusConnectionString = Microsoft.Azure.CloudConfigurationManager.GetSetting("ServiceBusConnectionString");
+            queueName = Microsoft.Azure.CloudConfigurationManager.GetSetting("QueueName");
+            
+            storageConnectionString = Microsoft.Azure.CloudConfigurationManager.GetSetting("StorageConnectionString");
+            //storageAccount = Microsoft.Azure.CloudConfigurationManager.GetSetting("StorageAccount");
+            storageLogsTableName = Microsoft.Azure.CloudConfigurationManager.GetSetting("StorageLogsTableName");
+#endif
+
+            namespaceManager = NamespaceManager.CreateFromConnectionString(serviceBusConnectionString);
+            cloudStorageAccount = CloudStorageAccount.Parse(storageConnectionString);
+
+            logTable = cloudStorageAccount.GetCloudTable(storageLogsTableName);
+        }
+
+        public async Task<OrderDto> ReceiveMessageFromQueue(string queueName)
+        {
+            OrderDto order = null;
+
+            var count = namespaceManager.GetQueue(queueName).MessageCount;
+            if (count <= 0)
+            {
+                return await Task.FromResult(order);
+            }
+
+            var queueClient = namespaceManager.GetQueueClient(serviceBusConnectionString, queueName);
+            var queueMessage = queueClient.Receive();
+            if (queueMessage == null)
+            {
+                return await Task.FromResult(order);
+            }
+
+            var jsonString = queueMessage.GetBody<string>();
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                return await Task.FromResult(order);
+            }
+
+            logTable.Create(jsonString, "Receive a message from queue.", "Worker");
+
+            order = JsonConvert.DeserializeObject<OrderDto>(jsonString);
+
+            return await Task.FromResult(order);
+        }
     }
 
     public class Bootstarp
@@ -117,78 +196,149 @@ namespace AzureCloudService.CastleWindsor.WorkerRole
 
         public void InstallComponents()
         {
+            Container.Register(Component.For<IRunner>().ImplementedBy<Runner>().LifestylePerThread());
+
+            Container.Register(Component.For<IOrderCommonWorker>().ImplementedBy<OrderCommonWorker>().LifestylePerThread());
+
             Container.Register(Component.For<IOrderWorker>().ImplementedBy<PickupOrderWorker>().LifestylePerThread().Named($"{nameof(OrderTypes.Pickup)}"));
             Container.Register(Component.For<IOrderWorker>().ImplementedBy<DeliverOrderWorker>().LifestylePerThread().Named($"{nameof(OrderTypes.Deliver)}"));
             Container.Register(Component.For<IOrderWorker>().ImplementedBy<ViolationOrderWorker>().LifestylePerThread().Named($"{nameof(OrderTypes.Violation)}"));
         }
     }
 
+    public class OrderCommonWorker : IOrderCommonWorker
+    {
+        private readonly IRunner runner = null;
+
+        public OrderCommonWorker(IRunner runner)
+        {
+            this.runner = runner;
+        }
+
+        public bool SplitOrder(OrderDto order)
+        {
+            return runner.Execute(() =>
+            {
+                for (var i = 0; i < order.SubOrders.Length; i++)
+                {
+                    order.SubOrders[i].Id = $"{order.Id.ToString("N")}-{i + 1}";
+                }
+
+                Debug.WriteLine(JsonConvert.SerializeObject(order));
+
+                return true;
+            }, GetType().Name, nameof(SplitOrder));
+        }
+    }
+
     public class PickupOrderWorker : IOrderWorker
     {
-        public bool SplitOrder(SubOrderDto subOrder)
+        private readonly IRunner runner = null;
+
+        public PickupOrderWorker(IRunner runner)
         {
-            return this.Execute(SplitOrder, subOrder);
+            this.runner = runner;
         }
 
         public bool CreateOrder(SubOrderDto subOrder)
         {
-            return this.Execute(CreateOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(CreateOrder));
         }
 
         public bool UpdateOrder(SubOrderDto subOrder)
         {
-            return this.Execute(UpdateOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(UpdateOrder));
         }
 
         public bool CancelOrder(SubOrderDto subOrder)
         {
-            return this.Execute(CancelOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(CancelOrder));
         }
     }
 
     public class DeliverOrderWorker : IOrderWorker
     {
-        public bool SplitOrder(SubOrderDto subOrder)
+        private readonly IRunner runner = null;
+
+        public DeliverOrderWorker(IRunner runner)
         {
-            return this.Execute(SplitOrder, subOrder);
+            this.runner = runner;
         }
 
         public bool CreateOrder(SubOrderDto subOrder)
         {
-            return this.Execute(CreateOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(CreateOrder));
         }
 
         public bool UpdateOrder(SubOrderDto subOrder)
         {
-            return this.Execute(UpdateOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(UpdateOrder));
         }
 
         public bool CancelOrder(SubOrderDto subOrder)
         {
-            return this.Execute(CancelOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(CancelOrder));
         }
     }
 
     public class ViolationOrderWorker : IOrderWorker
     {
-        public bool SplitOrder(SubOrderDto subOrder)
+        private readonly IRunner runner = null;
+
+        public ViolationOrderWorker(IRunner runner)
         {
-            return this.Execute(SplitOrder, subOrder);
+            this.runner = runner;
         }
 
         public bool CreateOrder(SubOrderDto subOrder)
         {
-            return this.Execute(CreateOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(CreateOrder));
         }
 
         public bool UpdateOrder(SubOrderDto subOrder)
         {
-            return this.Execute(UpdateOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(UpdateOrder));
         }
 
         public bool CancelOrder(SubOrderDto subOrder)
         {
-            return this.Execute(CancelOrder, subOrder);
+            return runner.Execute(() =>
+            {
+                Thread.Sleep(100);
+                return true;
+            }, GetType().Name, nameof(CancelOrder));
         }
     }
 }

@@ -25,9 +25,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CastleWindsor", "CastleWind
 EndProject
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "AzureCloudService.CastleWindsor", "AzureCloudService.CastleWindsor\AzureCloudService.CastleWindsor.ccproj", "{C5D541F4-3189-4E3B-AC1B-5ED21AB8E383}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.CastleWindsor.WebRole", "AzureCloudService.CastleWindsor.WebRole\AzureCloudService.CastleWindsor.WebRole.csproj", "{E60A20AF-8626-4E59-AFED-54671CC3317C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRole", "AzureCloudService.CastleWindsor.WebRole\WebRole.csproj", "{E60A20AF-8626-4E59-AFED-54671CC3317C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureCloudService.CastleWindsor.WorkerRole", "AzureCloudService.CastleWindsor.WorkerRole\AzureCloudService.CastleWindsor.WorkerRole.csproj", "{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerRole", "AzureCloudService.CastleWindsor.WorkerRole\WorkerRole.csproj", "{1CAB1D49-5E18-4FA1-BC9A-BBC4F91989F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

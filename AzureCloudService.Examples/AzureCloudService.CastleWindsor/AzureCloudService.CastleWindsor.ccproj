@@ -37,30 +37,30 @@
     <ServiceConfiguration Include="ServiceConfiguration.Cloud.cscfg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AzureCloudService.CastleWindsor.WebRole\AzureCloudService.CastleWindsor.WebRole.csproj">
-      <Name>AzureCloudService.CastleWindsor.WebRole</Name>
+    <ProjectReference Include="..\AzureCloudService.CastleWindsor.WebRole\WebRole.csproj">
+      <Name>WebRole</Name>
       <Project>{e60a20af-8626-4e59-afed-54671cc3317c}</Project>
       <Private>True</Private>
       <RoleType>Web</RoleType>
-      <RoleName>AzureCloudService.CastleWindsor.WebRole</RoleName>
+      <RoleName>WebRole</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
-    <ProjectReference Include="..\AzureCloudService.CastleWindsor.WorkerRole\AzureCloudService.CastleWindsor.WorkerRole.csproj">
-      <Name>AzureCloudService.CastleWindsor.WorkerRole</Name>
+    <ProjectReference Include="..\AzureCloudService.CastleWindsor.WorkerRole\WorkerRole.csproj">
+      <Name>WorkerRole</Name>
       <Project>{1cab1d49-5e18-4fa1-bc9a-bbc4f91989f3}</Project>
       <Private>True</Private>
       <RoleType>Worker</RoleType>
-      <RoleName>AzureCloudService.CastleWindsor.WorkerRole</RoleName>
+      <RoleName>WorkerRole</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AzureCloudService.CastleWindsor.WebRoleContent\" />
-    <Folder Include="AzureCloudService.CastleWindsor.WorkerRoleContent\" />
+    <Folder Include="WebRoleContent\" />
+    <Folder Include="WorkerRoleContent\" />
   </ItemGroup>
   <ItemGroup>
-    <DiagnosticsConfiguration Include="AzureCloudService.CastleWindsor.WebRoleContent\diagnostics.wadcfgx" />
-    <DiagnosticsConfiguration Include="AzureCloudService.CastleWindsor.WorkerRoleContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="WebRoleContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="WorkerRoleContent\diagnostics.wadcfgx" />
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
